@@ -488,8 +488,10 @@ class _BleClientListState extends State<BleClientList> {
 
   Container _buildView() {
     //if (_connectedDevice == null) {
-    //  return Container(child: _buildListViewOfDevices());
-    //}
+    if (true) {
+      //return Container(child: _buildListViewOfDevices());
+      return Container(child: Image(image: AssetImage('graphics/doors/DOOR_ALL_CLOSED_16_9.png')));
+    }
     return
       Container(
         child: Column(
