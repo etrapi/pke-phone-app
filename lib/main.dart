@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:hispanosuizaapp/providers/local_storage_provider.dart';
-import 'package:hispanosuizaapp/providers/state_provider.dart';
+import 'package:hispanosuizaapp/providers/vehicle_provider.dart';
 import 'package:hispanosuizaapp/views/home_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+final darkTheme = ThemeData(
+  primarySwatch: Colors.grey,
+  primaryColor: Colors.black,
+  brightness: Brightness.dark,
+  backgroundColor: const Color(0xff1d1d26),
+  scaffoldBackgroundColor:  Colors.black,
+  accentColor: Colors.tealAccent,//Colors.yellow[700],
+  accentIconTheme: IconThemeData(color: Colors.tealAccent),
+  dividerColor: Colors.black12,
+  fontFamily: 'Dinpro',
+);
+
+final defaultTheme = ThemeData(
+  primarySwatch: Colors.blue,
+  visualDensity: VisualDensity.adaptivePlatformDensity,
+);
 
 /// The [SharedPreferences] key to access the alarm fire count.
 const String countKey = 'count';
@@ -25,17 +42,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (context) => StateProvider()),
+          ChangeNotifierProvider(create: (context) => VehicleProvider()),
           ChangeNotifierProvider(create: (context) => LocalStorageProvider()),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-          ),
-          home: HomeView(title: 'Flutter Demo Home View'),
+          title: 'Hispano-Suiza Cars',
+          theme: darkTheme,
+          home: HomeView(title: 'Hispano-Suiza Cars'),
+
         ));
   }
 }

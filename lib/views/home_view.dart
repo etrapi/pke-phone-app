@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hispanosuizaapp/views/ble_client_list.dart';
+
+import 'key_view.dart';
 
 
 class HomeView extends StatefulWidget {
@@ -14,8 +15,8 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   int _selectedIndex = 0;
   List<Widget> _widgetOptions = <Widget>[
-    BleClientList(),
-
+    //BleClientList(),
+    KeyView(),
   ];
 
   void _onItemTapped(int index) {
