@@ -1,0 +1,36 @@
+appbar:
+  home: PARAMETERS
+  climate: CLIMATE
+  key: KEY
+  location: LOCATION
+  settings: SETTINGS
+
+login:
+  login: LOG IN
+  email: E-mail address
+  pass: Password
+  forgot: FORGOT PASSWORD?
+  passblank: Password can not be blank
+  emailblank: E-mail can not be blank
+  error: E-mail or password not valid
+
+settings:
+  signout: SIGN OUT
+
+key:
+  charging:  CHARGING...
+  range:  mi RANGE
+  warning: WARNING
+  honk: HONK
+  lock: LOCK
+  unlock: UNLOCK
+  lights: LIGHTS
+  ldoor: LEFT DOOR
+  rdoor: RIGHT DOOR
+  inlet: INLET
+
+climate:
+  adjust: SLIDE TO ADJUST
+  defrost: DEFROST
+
+

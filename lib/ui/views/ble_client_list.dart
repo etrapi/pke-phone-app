@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:hispanosuizaapp/models/user.dart';
+import 'package:hispanosuizaapp/core/models/user.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_beacon/flutter_beacon.dart';
 import 'package:shared_preferences/shared_preferences.dart';

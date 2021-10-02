@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
-import 'package:hispanosuizaapp/models/user.dart';
+import 'package:hispanosuizaapp/core/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageProvider extends ChangeNotifier {

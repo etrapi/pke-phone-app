@@ -1,0 +1,34 @@
+appbar:
+  home: PARAMETROS
+  climate: CLIMATIZADOR
+  key: LLAVE
+  location: LOCALIZACIÓN
+  settings: PREFERENCIAS
+
+login:
+  login: ENTRAR
+  email: Dirección E-mail
+  pass: Contraseña
+  forgot: ¿CONTRASEÑA OLVIDADA?
+  passblank: Contraseña no puede estar vacía
+  emailblank: E-mail no puede estar vacío
+  error: E-mail o contraseña inválida
+
+settings:
+  signout: CERRAR SESIÓN
+
+key:
+  charging:  CARGANDO...
+  range:  km RANGO
+  warning: ALERTA
+  honk: CLAXON
+  lock: BLOQUEAR
+  unlock: DESBLOQUEAR
+  lights: LUCES
+  ldoor: PUERTA IZQ.
+  rdoor: PUERTA DER.
+  inlet: INLET
+
+climate:
+  adjust: DESLIZA PARA AJUSTAR
+  defrost: DESCONGELAR

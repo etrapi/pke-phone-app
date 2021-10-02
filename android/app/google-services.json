@@ -1,0 +1,119 @@
+{
+  "project_info": {
+    "project_number": "490100302563",
+    "firebase_url": "https://qevcloud.firebaseio.com",
+    "project_id": "qevcloud",
+    "storage_bucket": "qevcloud.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490100302563:android:e9f1c723a565bc4bd81bd6",
+        "android_client_info": {
+          "package_name": "com.qev.carapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "490100302563-h9504epfappn8g6e9rj46hnqogv6govc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgGydwTUwgHYt4zb1eZ8g6Z9SGuewn-Dw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "490100302563-h9504epfappn8g6e9rj46hnqogv6govc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "490100302563-d2ojqiauqpqggn9eebd18hjuqg5joefk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.qev.phoneapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490100302563:android:438aaead10b17288d81bd6",
+        "android_client_info": {
+          "package_name": "com.qev.phoneapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "490100302563-h9504epfappn8g6e9rj46hnqogv6govc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgGydwTUwgHYt4zb1eZ8g6Z9SGuewn-Dw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "490100302563-h9504epfappn8g6e9rj46hnqogv6govc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "490100302563-d2ojqiauqpqggn9eebd18hjuqg5joefk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.qev.phoneapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490100302563:android:317ab33e9ac0754cd81bd6",
+        "android_client_info": {
+          "package_name": "com.qevtech.hispanosuizaapp",
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "490100302563-h9504epfappn8g6e9rj46hnqogv6govc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgGydwTUwgHYt4zb1eZ8g6Z9SGuewn-Dw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "490100302563-h9504epfappn8g6e9rj46hnqogv6govc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "490100302563-d2ojqiauqpqggn9eebd18hjuqg5joefk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.qev.phoneapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

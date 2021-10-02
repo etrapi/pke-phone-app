@@ -1,9 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hispanosuizaapp/providers/local_storage_provider.dart';
-import 'package:hispanosuizaapp/providers/vehicle_provider.dart';
-import 'package:hispanosuizaapp/views/home_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hispanosuizaapp/providers/local_storage_provider.dart';
+import 'package:hispanosuizaapp/providers/vehicle_provider.dart';
+import 'package:hispanosuizaapp/ui/views/home_view.dart';
+import 'package:hispanosuizaapp/ui/views/login_view.dart';
+import 'package:hispanosuizaapp/app_localizations.dart';
+import 'package:hispanosuizaapp/providers/login_provider.dart';
+
 
 final darkTheme = ThemeData(
   primarySwatch: Colors.grey,
@@ -33,6 +39,8 @@ Future<void> main() async {
   if (!prefs.containsKey(countKey)) {
     await prefs.setInt(countKey, 0);
   }*/
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -44,13 +52,39 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (context) => VehicleProvider()),
           ChangeNotifierProvider(create: (context) => LocalStorageProvider()),
+          ChangeNotifierProvider (create: (context) => LoginProvider()),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Hispano-Suiza Cars',
           theme: darkTheme,
-          home: HomeView(title: 'Hispano-Suiza Cars'),
-
-        ));
+          initialRoute: '/',
+          onGenerateRoute: (settings) {
+            return MaterialPageRoute(
+                builder: (BuildContext context) => HomeView()
+            );
+          },
+          routes: {
+            '/': (BuildContext context) {
+              var login = Provider.of<LoginProvider>(context);
+              if (login.isLoggedIn()) {
+                return HomeView();
+              } else {
+                return LoginView();
+              }
+            },
+          },
+          supportedLocales: [
+            Locale('en'),
+            Locale('es'),
+          ],
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+        )
+    );
   }
 }

@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:typicons_flutter/typicons_flutter.dart';
-import 'package:hispanosuizaapp/models/vehicle_model.dart';
+import 'package:hispanosuizaapp/core/models/vehicle_model.dart';
+import 'package:hispanosuizaapp/app_localizations.dart';
 
 class KeyView extends StatefulWidget {
   @override
@@ -15,16 +16,19 @@ class KeyView extends StatefulWidget {
 
 class _KeyViewState extends State<KeyView> {
   final myController = TextEditingController();
+  bool _demo = false;
 
-  void ButtonClick(String label) {
-    print("Button: " + label + " is clicked");
-  }
 
   @override
   Widget build(BuildContext context) {
-    //AppLocalizations localizations = AppLocalizations.of(context);
+    AppLocalizations localizations = AppLocalizations.of(context);
     VehicleProvider _vehicleProvider = Provider.of<VehicleProvider>(context);
     Vehicle vehicle = _vehicleProvider.vehicle;
+
+    void ButtonClick(String label) {
+      print("Button: " + label + " is clicked");
+      if (label == "key.inlet") _vehicleProvider.cmdInlet();
+    }
 
     Column _buildButtonColumn(Color color, IconData icon, String label,
         double fsize, double isize, double margin) {
@@ -42,17 +46,17 @@ class _KeyViewState extends State<KeyView> {
           highlightColor: Colors.blueGrey,
           padding: EdgeInsets.all(margin),
         ),
-        // Container(
-        //   margin: const EdgeInsets.only(top: 8),
-        //   child: Text(
-        //     "Label" ,//localizations.t(label),
-        //     style: TextStyle(
-        //       fontSize: fsize,
-        //       fontWeight: FontWeight.w400,
-        //       color: color,
-        //     ),
-        //   ),
-        // ),
+        Container(
+          margin: const EdgeInsets.only(top: 8),
+          child: Text(
+            localizations.t(label),
+            style: TextStyle(
+              fontSize: fsize,
+              fontWeight: FontWeight.w400,
+              color: color,
+            ),
+          ),
+        ),
       ]);
     }
 
@@ -65,7 +69,7 @@ class _KeyViewState extends State<KeyView> {
             style: TextStyle(fontSize: 13.0, color: Colors.white),
           ),
           Text(
-            " RANGE", //localizations.t('key.range'),
+            localizations.t('key.range'),
             style: TextStyle(fontSize: 13.0, color: Colors.white),
           ),
           //TODO: A PARTIR DE AQUÍ SOLO CUANDO EL VEHICULO ESTÉ CARGANDO!!!!!
@@ -79,10 +83,92 @@ class _KeyViewState extends State<KeyView> {
           SizedBox(width: 2),
           if (vehicle.BCharging)
             Text(
-              "CHARGING...",
-              //localizations.t('key.charging'),
+              //"cNG...",
+              localizations.t('key.charging'),
               style: TextStyle(fontSize: 13.0, color: Colors.tealAccent),
             ),
+        ],
+      );
+    }
+
+    Widget getTouchAreas() {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Container(
+            //color: Colors.blue,
+            height: MediaQuery.of(context).size.height * 0.10,
+            width: MediaQuery.of(context).size.width * 0.33,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: _demo ? Colors.tealAccent : Colors.transparent,
+              )
+            ),
+            child: Material(
+                color: Colors.transparent,
+                child: InkResponse(
+                    borderRadius: BorderRadius.circular(200),
+                    splashColor:  Colors.tealAccent.withOpacity(0.25),
+                    highlightColor: Colors.transparent,
+                    containedInkWell: true,
+                    onTap: () => _vehicleProvider.cmdBonnet())),
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Container(
+              height: MediaQuery.of(context).size.height * 0.15,
+              width: MediaQuery.of(context).size.width * 0.35,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _demo ? Colors.tealAccent : Colors.transparent,
+                ),
+                shape: BoxShape.rectangle,
+              ),
+              child: Material(
+                  color: Colors.transparent,
+                  child: InkResponse(
+                      borderRadius: BorderRadius.circular(200),
+                      splashColor: Colors.tealAccent.withOpacity(0.25),
+                      highlightColor: Colors.transparent,
+                      containedInkWell: true,
+                      onTap: () => _vehicleProvider.cmdDriverDoor())),
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height * 0.15,
+              width: MediaQuery.of(context).size.width * 0.35,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _demo ? Colors.tealAccent : Colors.transparent,
+                ),
+                shape: BoxShape.rectangle,
+              ),
+              child: Material(
+                  color: Colors.transparent,
+                  child: InkResponse(
+                      borderRadius: BorderRadius.circular(200),
+                      splashColor: Colors.tealAccent.withOpacity(0.25),
+                      highlightColor: Colors.transparent,
+                      containedInkWell: true,
+                      onTap: () => _vehicleProvider.cmdPaxDoor())),
+            )
+          ]),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.18,
+            width: MediaQuery.of(context).size.width * 0.33,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: _demo ? Colors.tealAccent : Colors.transparent,
+              ),
+              shape: BoxShape.rectangle,
+            ),
+            child: Material(
+                color: Colors.transparent,
+                child: InkResponse(
+                    borderRadius: BorderRadius.circular(200),
+                    splashColor: Colors.tealAccent.withOpacity(0.25),
+                    highlightColor: Colors.transparent,
+                    containedInkWell: true,
+                    onTap: () => _vehicleProvider.cmdBoot())),
+          ),
         ],
       );
     }
@@ -108,36 +194,48 @@ class _KeyViewState extends State<KeyView> {
       //TODO: Faltaría añadir las imagenes del capó y el bonnet abiertas
       return Container(
         alignment: Alignment.center,
-        margin: const EdgeInsets.all(35.0),
-        height: MediaQuery.of(context).size.height * 0.55,
+        height: MediaQuery.of(context).size.height * 0.50,
         child: Stack(children: [
-          Container(alignment: Alignment.center,child:Image.asset(assetCarClosed)),
-          if (_vehicle.NDoorDriverStatus == 1) Container(alignment: Alignment.center,child:Image.asset(assetCarLeft)),
-          if (_vehicle.NDoorPaxStatus == 1) Container(alignment: Alignment.center,child:Image.asset(assetCarRight)),
-          if (_vehicle.NBonnetStatus == 1) Container(alignment: Alignment.center,child:Image.asset(assetCarFront)),
-          if (_vehicle.NBootStatus == 1) Container(alignment: Alignment.center,child:Image.asset(assetCarBack)),
-          if (_vehicle.NLowBeamHeadStatus == 1) Container(alignment: Alignment.center,child:Image.asset(assetLights)),
-          if (_vehicle.NWarningLightStatus == 1) Container(alignment: Alignment.center,child:Image.asset(assetWarnings)),
-          if (_vehicle.NChargerCapStatus == 1) Container(alignment: Alignment.center, child:Image.asset(assetCarCharger)),
-          Container(              alignment: Alignment.center,
-              child: Icon(Icons.bluetooth_connected_outlined, color: Colors.blueAccent.withOpacity(0.45))),
           Container(
-              color: Colors.transparent,
-              //height: 300,
-              //width: 300,
-              //child: Material(
-              //  color: Colors.transparent,
-                child: InkResponse(
-                  //borderRadius: BorderRadius.circular(80),
-                  splashColor: Colors.grey.withOpacity(0.45),
-                  highlightColor: Colors.transparent,
-                onTap: () {
-                 print("Tapped on container");
-                },
-
+              alignment: Alignment.center,
+              child: Image.asset(assetCarClosed)),
+          if (_vehicle.NDoorDriverStatus == 1)
+            Container(
+                alignment: Alignment.center,
+                child: Image.asset(assetCarLeft)),
+          if (_vehicle.NDoorPaxStatus == 1)
+            Container(
+                alignment: Alignment.center,
+                child: Image.asset(assetCarRight)),
+          if (_vehicle.NBonnetStatus == 1)
+            Container(
+                alignment: Alignment.center,
+                child: Image.asset(assetCarFront)),
+          if (_vehicle.NBootStatus == 1)
+            Container(
+                alignment: Alignment.center,
+                child: Image.asset(assetCarBack)),
+          if (_vehicle.NLowBeamHeadStatus == 1)
+            Container(
+                margin: const EdgeInsets.all(0.0),
+                alignment: Alignment.center,
+                child: Image.asset(assetLights)),
+          if (_vehicle.NWarningLightStatus == 1)
+            Container(
+                alignment: Alignment.center,
+                child: Image.asset(assetWarnings)),
+          if (_vehicle.NChargerCapStatus == 1)
+            Container(
+                alignment: Alignment.center,
+                child: Opacity(
+                    opacity: 0.6,
+                    child: Image.asset(assetCarCharger))
             ),
-            //  ),
-          )
+          Container(
+              alignment: Alignment.center,
+              child: Icon(Icons.bluetooth_connected_outlined,
+                  color: Colors.blueAccent.withOpacity(0.55))),
+          getTouchAreas(),
         ]),
       );
     }
@@ -164,7 +262,7 @@ class _KeyViewState extends State<KeyView> {
             CircularPercentIndicator(
               progressColor: currentProgressColor((vehicle.rSoC.toInt())),
               backgroundColor: Color(0x884676),
-              percent: _vehicle.rSoC/100,
+              percent: _vehicle.rSoC / 100,
               animation: true,
               radius: 75.0,
               lineWidth: 2.0,
@@ -194,8 +292,9 @@ class _KeyViewState extends State<KeyView> {
       return Container(
         width: double.infinity,
         alignment: Alignment.center,
-        child: Stack(children: [
+        child: Column(children: [
           topKey(_vehicle),
+          SizedBox(height: 40),
           Align(
             alignment: Alignment.bottomCenter,
             child: getStack(_vehicle),
@@ -214,13 +313,8 @@ class _KeyViewState extends State<KeyView> {
                 'key.lights', 12.0, 30.0, 20.0),
             _buildButtonColumn(Colors.white, Typicons.warning_outline,
                 'key.warning', 12.0, 35.0, 17.5),
-
-            // _buildButtonColumn(Colors.white, FlutterIcons.car_crash_faw5s,
-            //     'key.honk', 12.0, 30.0, 20.0),
-//          _buildButtonColumn(Colors.white, Icons.lock, 'key.lock',12.0,25.0,20.0), //TODO: Cambiar icono y mensaje en funcion de estado vehículo.Vehicle Open
-            //
-            _buildButtonColumn(
-                Colors.white, Icons.electrical_services, 'key.inlet', 12.0, 30.0, 20.0),
+            _buildButtonColumn(Colors.white, Icons.electrical_services,
+                'key.inlet', 12.0, 30.0, 20.0),
             //Vehicle Locked
           ],
         ),
