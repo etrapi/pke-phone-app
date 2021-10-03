@@ -60,4 +60,21 @@ class VehicleProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void cmdWarning() async {
+    if (vehicle.NWarningLightStatus == 1) {
+      vehicle.NWarningLightStatus = 0;
+    } else if (vehicle.NWarningLightStatus == 0) {
+      vehicle.NWarningLightStatus = 1;
+    }
+    notifyListeners();
+  }
+  void cmdLights() async {
+    if (vehicle.NLowBeamHeadStatus == 1) {
+      vehicle.NLowBeamHeadStatus = 0;
+    } else if (vehicle.NLowBeamHeadStatus == 0) {
+      vehicle.NLowBeamHeadStatus = 1;
+    }
+    notifyListeners();
+  }
 }

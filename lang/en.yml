@@ -28,6 +28,7 @@ key:
   ldoor: LEFT DOOR
   rdoor: RIGHT DOOR
   inlet: INLET
+  blesearch: SEARCHING FOR HISPANO-SUIZA ...
 
 climate:
   adjust: SLIDE TO ADJUST

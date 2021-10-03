@@ -28,6 +28,7 @@ key:
   ldoor: PUERTA IZQ.
   rdoor: PUERTA DER.
   inlet: INLET
+  blesearch: BUSCANDO HISPANO-SUIZA ...
 
 climate:
   adjust: DESLIZA PARA AJUSTAR
