@@ -6,7 +6,7 @@ class VehicleProvider extends ChangeNotifier {
   Vehicle vehicle = Vehicle.fromMap(
       {'NDoorDriverStatus': 0,
         'NDoorPaxStatus': 0,
-        'NLowBeamHeadStatus' : 0,
+        'NLowBeamHeadStatus' : 1,
         'NWarningLightStatus' : 0,
         'NBootStatus' : 0,
         'NBonnetStatus' : 0,

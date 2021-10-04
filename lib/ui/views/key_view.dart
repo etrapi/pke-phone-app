@@ -398,7 +398,7 @@ class _KeyViewState extends State<KeyView> {
         children: [
           Container(
             //color: Colors.blue,
-            height: MediaQuery.of(context).size.height * 0.10,
+            height: MediaQuery.of(context).size.height * 0.20,
             width: MediaQuery.of(context).size.width * 0.33,
             decoration: BoxDecoration(
               border: Border.all(
@@ -417,8 +417,8 @@ class _KeyViewState extends State<KeyView> {
           ),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.15,
-              width: MediaQuery.of(context).size.width * 0.35,
+              height: MediaQuery.of(context).size.height * 0.2,
+              width: MediaQuery.of(context).size.width * 0.4,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: _demo ? Colors.tealAccent : Colors.transparent,
@@ -436,8 +436,8 @@ class _KeyViewState extends State<KeyView> {
               ),
             ),
             Container(
-              height: MediaQuery.of(context).size.height * 0.15,
-              width: MediaQuery.of(context).size.width * 0.35,
+              height: MediaQuery.of(context).size.height * 0.2,
+              width: MediaQuery.of(context).size.width * 0.4,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: _demo ? Colors.tealAccent : Colors.transparent,
@@ -455,7 +455,7 @@ class _KeyViewState extends State<KeyView> {
             )
           ]),
           Container(
-            height: MediaQuery.of(context).size.height * 0.18,
+            height: MediaQuery.of(context).size.height * 0.15,
             width: MediaQuery.of(context).size.width * 0.33,
             decoration: BoxDecoration(
               border: Border.all(
@@ -478,26 +478,26 @@ class _KeyViewState extends State<KeyView> {
 
     Widget getStack(Vehicle _vehicle) {
       String assetLights =
-          'assets/mipmap/mipmap-hdpi/Key_View/Lights on@3x.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/low_beam.png';
       String assetWarnings =
-          'assets/mipmap/mipmap-hdpi/Key_View/warnings_lights.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/warnings_lights_1900.png';
       String assetCarLeft =
-          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_LEFT_V_.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_LEFT_V_1900.png';
       String assetCarRight =
-          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_RIGHT_V_.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_RIGHT_V_1900.png';
       String assetCarClosed =
-          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_ALL_CLOSED_V_.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_ALL_CLOSED_V_1900.png';
       String assetCarFront =
-          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_FRONT_V_.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_FRONT_V_1900.png';
       String assetCarBack =
-          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_BACK_V_.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_BACK_V_1900.png';
       String assetCarCharger =
-          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_CHARGE_V_.png';
+          'assets/mipmap/mipmap-hdpi/Key_View/DOOR_CHARGE_V_1900.png';
 
       //TODO: Faltaría añadir las imagenes del capó y el bonnet abiertas
       return Container(
         alignment: Alignment.center,
-        height: MediaQuery.of(context).size.height * 0.45,
+        height: MediaQuery.of(context).size.height * 0.55,
         child: Stack(children: [
           Container(
               alignment: Alignment.center,
@@ -520,8 +520,7 @@ class _KeyViewState extends State<KeyView> {
                 child: Image.asset(assetCarBack)),
           if (_vehicle.NLowBeamHeadStatus == 1)
             Container(
-                margin: const EdgeInsets.all(0.0),
-                alignment: Alignment.center,
+                alignment: Alignment.topCenter,
                 child: Image.asset(assetLights)),
           if (_vehicle.NWarningLightStatus == 1)
             Container(
@@ -602,13 +601,12 @@ class _KeyViewState extends State<KeyView> {
     }
 
     Widget centerKey(Vehicle _vehicle) {
-      //TODO: Falta añadir botones para Abrir Bonnet y Trunk
       return Container(
         width: double.infinity,
         alignment: Alignment.center,
         child: Column(children: [
           topKey(_vehicle),
-          SizedBox(height: 40),
+          SizedBox(height: 10),
           Align(
             alignment: Alignment.bottomCenter,
             child: getStack(_vehicle),
