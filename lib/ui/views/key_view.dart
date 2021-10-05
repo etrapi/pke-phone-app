@@ -15,7 +15,7 @@ import 'package:hispanosuizaapp/core/models/vehicle_model.dart';
 import 'package:hispanosuizaapp/app_localizations.dart';
 
 
-//TODO: Separar servicio Ble de UI
+//TODO: Separar servicio Ble de UI y pasar el provider Vehículo al UI
 class KeyView extends StatefulWidget {
   final String title = "";
   final FlutterBlue flutterBlue = FlutterBlue.instance;
@@ -26,11 +26,12 @@ class KeyView extends StatefulWidget {
 }
 
 class _KeyViewState extends State<KeyView> {
-  static const bool _demo = true; //Turn on demo mode
+  bool _demo = true; //Turn on demo mode
   final myController = TextEditingController();
   BluetoothDevice _connectedDevice;
   BluetoothCharacteristic _pkeCharacteristic;
   BluetoothCharacteristic _cmdCharacteristic;
+  BluetoothCharacteristic _fbkCharacteristic;
   List<BluetoothService> _services;
   StreamSubscription<RangingResult> _streamRanging;
   final _regionBeacons = <Region, List<Beacon>>{};
@@ -40,6 +41,8 @@ class _KeyViewState extends State<KeyView> {
   int keyId = 0x0A;
   String vehicleId = '00000003';
   int count = 0;
+  Vehicle vehicle = Vehicle();
+  bool _warningsVisible = false;
 
   _initStreams () {
     widget.flutterBlue.isScanning
@@ -83,8 +86,9 @@ class _KeyViewState extends State<KeyView> {
   }
 
   _connectDevice(final BluetoothDevice device) async {
-    BluetoothCharacteristic chpke;
-    BluetoothCharacteristic chcmd;
+    BluetoothCharacteristic _chpke;
+    BluetoothCharacteristic _chcmd;
+    BluetoothCharacteristic _chfbk;
     _stopDevicesDiscovery();
     try {
       await device.connect();
@@ -102,18 +106,23 @@ class _KeyViewState extends State<KeyView> {
             print('(S1)' + service.uuid.toString());
             if (characteristic.uuid ==
                 Guid("d9b9ec1f-3925-43d0-80a9-1e11"+vehicleId)) {
-              chpke = characteristic;
-              print('  (C1)' + characteristic.uuid.toString());
+              _chpke = characteristic;
+              print('  (S1C1)' + characteristic.uuid.toString());
             }
           }
-        if (service.uuid == Guid("d9b9ec1f-3925-43d0-80a9-1e01"+vehicleId))
+        else if (service.uuid == Guid("d9b9ec1f-3925-43d0-80a9-1e01"+vehicleId))
           for (BluetoothCharacteristic characteristic
           in service.characteristics) {
             print('(S2)' + service.uuid.toString());
             if (characteristic.uuid ==
                 Guid("d9b9ec1f-3925-43d0-80a9-1e21"+vehicleId)) {
-              chcmd = characteristic;
-              print('  (C2)' + characteristic.uuid.toString());
+              _chcmd = characteristic;
+              print('  (S2C1)' + characteristic.uuid.toString());
+            }
+            else if (characteristic.uuid ==
+                Guid("d9b9ec1f-3925-43d0-80a9-1e22"+vehicleId)) {
+                _chfbk = characteristic;
+                print('  (S2C2)' + characteristic.uuid.toString());
             }
           }
       }
@@ -121,8 +130,9 @@ class _KeyViewState extends State<KeyView> {
       setState(() {
         _connectedDevice = device;
         print ("El puto dispositivo conectado se llama:" + device.name);
-        _pkeCharacteristic = chpke;
-        _cmdCharacteristic = chcmd;
+        _pkeCharacteristic = _chpke;
+        _cmdCharacteristic = _chcmd;
+        _fbkCharacteristic = _chfbk;
 
       });
     }
@@ -275,12 +285,49 @@ class _KeyViewState extends State<KeyView> {
         print("CMD pattform exception");
         retry ++;
       } catch (e) {
-        print("CMD" + e.toString());
+        print("CMD Write Exception " + e.toString());
         await _resetConnection();
         retry ++;
         //throw e;
       }
     }while (retry < 3);
+  }
+
+  _readFbkData() async {
+    List<int> _fbkData = [0, 0];
+    //await _fbkCharacteristic.setNotifyValue(true);
+    var retry = 0;
+    do {
+      try {
+        count++;
+        if (_fbkCharacteristic.properties.read) {
+          List<int> data = await _fbkCharacteristic.read();
+            setState(() {
+              if (data[0] >= 0 && data[0] <=7) vehicle.NDoorDriverStatus = data[0];
+              if (data[1] >= 0 && data[1] <=7) vehicle.NDoorPaxStatus = data[1];
+              if (data[2] >= 0 && data[2] <=7) vehicle.NBonnetStatus = data[2];
+              if (data[3] >= 0 && data[3] <=7) vehicle.NBootStatus= data[3];
+              if (data[4] >= 0 && data[4] <=7) vehicle.NChargerCapStatus = data[4];
+              if (data[5] >= 0 && data[5] <=7) vehicle.NLowBeamHeadStatus = data[5];
+              if (data[6] >= 0 && data[6] <=7) vehicle.NWarningLightStatus = data[6];
+              vehicle.BCharging =  (data[7]) == 0 ? false : true;
+              num _rSoC = (data[8] * 0.5);
+              if (_rSoC > 0.0 && _rSoC <= 100.0) vehicle.rSoC = _rSoC;
+              num _range = ((data[9] * 256 + data[10]) * 0.01).toInt();
+              if (_range >= 0 && _range <=1000) vehicle.sRange = _range;
+            });
+            print("received value: " + data.toString());
+
+        }
+        break;
+      } on PlatformException {
+        await Future.delayed(Duration(milliseconds: 100));
+        print("FBK pattform exception");
+        retry++;
+      } catch (e) {
+        print("FBK Read Exception " + e.toString());
+      }
+    } while (retry < 5);
   }
 
   @override
@@ -289,9 +336,18 @@ class _KeyViewState extends State<KeyView> {
     _initStreams ();
     _startDevicesDiscovery ();
     _initScanBeacon();
-    Timer.periodic(Duration(milliseconds: 5000), (timer) {
+    Timer.periodic(Duration(milliseconds: 5000), (timer) async {
       print(DateTime.now());
       _writePkeData();
+      _readFbkData();
+    });
+    Timer.periodic(Duration(milliseconds: 500), (timer) async {//asynchronous delay
+      if (this.mounted) { //checks if widget is still active and not disposed
+        setState(() { //tells the widget builder to rebuild again because ui has updated
+          if (!_warningsVisible) _warningsVisible=true;
+          else _warningsVisible=false;//update the variable declare this under your class so its accessible for both your widget build and initState which is located under widget build{}
+        });
+      }
     });
   }
 
@@ -299,18 +355,19 @@ class _KeyViewState extends State<KeyView> {
   Widget build(BuildContext context) {
     AppLocalizations localizations = AppLocalizations.of(context);
     VehicleProvider _vehicleProvider = Provider.of<VehicleProvider>(context);
-    Vehicle vehicle = _vehicleProvider.vehicle;
-
+    //Vehicle vehicle_provider = _vehicleProvider.vehicle;
+    if (_connectedDevice != null) _demo=false;
+    else _demo = true;
     void _buttonClick(String label) {
       print("Button: " + label + " is clicked");
       if (_demo) {
-        if (label == "key.inlet") _vehicleProvider.cmdInlet();
-        if (label == "key.warning") _vehicleProvider.cmdWarning();
-        if (label == "key.lights") _vehicleProvider.cmdLights();
-        if (label == "key.ldoor") _vehicleProvider.cmdDriverDoor();
-        if (label == "key.rdoor") _vehicleProvider.cmdPaxDoor();
-        if (label == "key.bonnet") _vehicleProvider.cmdBonnet();
-        if (label == "key.boot") _vehicleProvider.cmdBoot();
+        if (label == "key.inlet") vehicle.cmdInlet();
+        if (label == "key.warning") vehicle.cmdWarning();
+        if (label == "key.lights") vehicle.cmdLights();
+        if (label == "key.ldoor") vehicle.cmdDriverDoor();
+        if (label == "key.rdoor") vehicle.cmdPaxDoor();
+        if (label == "key.bonnet") vehicle.cmdBonnet();
+        if (label == "key.boot") vehicle.cmdBoot();
       } else {
         if (label == "key.inlet") _writeCmdData (7,0);
         if (label == "key.warning") _writeCmdData (3,0);
@@ -353,7 +410,7 @@ class _KeyViewState extends State<KeyView> {
     }
 
     Widget editableText(int _BatteryRange) {
-      if (_connectedDevice != null) {
+      if (_connectedDevice != null && vehicle.sRange > 0) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -417,7 +474,7 @@ class _KeyViewState extends State<KeyView> {
           ),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.2,
+              height: MediaQuery.of(context).size.height * 0.15,
               width: MediaQuery.of(context).size.width * 0.4,
               decoration: BoxDecoration(
                 border: Border.all(
@@ -436,7 +493,7 @@ class _KeyViewState extends State<KeyView> {
               ),
             ),
             Container(
-              height: MediaQuery.of(context).size.height * 0.2,
+              height: MediaQuery.of(context).size.height * 0.15,
               width: MediaQuery.of(context).size.width * 0.4,
               decoration: BoxDecoration(
                 border: Border.all(
@@ -497,7 +554,7 @@ class _KeyViewState extends State<KeyView> {
       //TODO: Faltaría añadir las imagenes del capó y el bonnet abiertas
       return Container(
         alignment: Alignment.center,
-        height: MediaQuery.of(context).size.height * 0.55,
+        height: MediaQuery.of(context).size.height * 0.50,
         child: Stack(children: [
           Container(
               alignment: Alignment.center,
@@ -521,11 +578,20 @@ class _KeyViewState extends State<KeyView> {
           if (_vehicle.NLowBeamHeadStatus == 1)
             Container(
                 alignment: Alignment.topCenter,
-                child: Image.asset(assetLights)),
+                child: Image.asset(assetLights)
+              ),
+
           if (_vehicle.NWarningLightStatus == 1)
-            Container(
+            AnimatedOpacity(
+              // If the widget is visible, animate to 0.0 (invisible).
+              // If the widget is hidden, animate to 1.0 (fully visible).
+                opacity: _warningsVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                // The green box must be a child of the AnimatedOpacity widget.
+                child: Container(
                 alignment: Alignment.center,
-                child: Image.asset(assetWarnings)),
+                child: Image.asset(assetWarnings))
+            ),
           if (_vehicle.NChargerCapStatus == 1)
             Container(
                 alignment: Alignment.center,
@@ -572,7 +638,7 @@ class _KeyViewState extends State<KeyView> {
             SizedBox(height: 18),
             //if (_connectedDevice == null)
             //else
-              if (_connectedDevice != null)CircularPercentIndicator(
+              if (_connectedDevice != null && vehicle.rSoC > 0) CircularPercentIndicator(
               progressColor: currentProgressColor((vehicle.rSoC.toInt())),
               backgroundColor: Color(0x884676),
               percent: _vehicle.rSoC / 100,

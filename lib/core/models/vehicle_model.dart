@@ -89,5 +89,59 @@ class Vehicle {
             "vehicleDescription" : vehicleDescription,
           };
   }
+  void cmdDriverDoor() async {
+    if (NDoorDriverStatus == 1) {
+      NDoorDriverStatus = 0;
+    } else if (NDoorDriverStatus == 0) {
+      NDoorDriverStatus = 1;
+    }
+  }
+
+  void cmdPaxDoor() async {
+    if (NDoorPaxStatus == 1) {
+      NDoorPaxStatus = 0;
+    } else if (NDoorPaxStatus == 0) {
+      NDoorPaxStatus = 1;
+    }
+  }
+
+  void cmdBonnet() async {
+    if (NBonnetStatus == 1) {
+      NBonnetStatus = 0;
+    } else if (NBonnetStatus == 0) {
+      NBonnetStatus = 1;
+    }
+  }
+
+  void cmdBoot() async {
+    if (NBootStatus == 1) {
+      NBootStatus = 0;
+    } else if (NBootStatus == 0) {
+      NBootStatus = 1;
+    }
+  }
+
+  void cmdInlet() async {
+    if (NChargerCapStatus == 1) {
+      NChargerCapStatus = 0;
+    } else if (NChargerCapStatus == 0) {
+      NChargerCapStatus = 1;
+    }
+  }
+
+  void cmdWarning() async {
+    if (NWarningLightStatus == 1) {
+      NWarningLightStatus = 0;
+    } else if (NWarningLightStatus == 0) {
+      NWarningLightStatus = 1;
+    }
+  }
+  void cmdLights() async {
+    if (NLowBeamHeadStatus == 1) {
+      NLowBeamHeadStatus = 0;
+    } else if (NLowBeamHeadStatus == 0) {
+      NLowBeamHeadStatus = 1;
+    }
+  }
 
 }
