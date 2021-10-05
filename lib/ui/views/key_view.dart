@@ -410,7 +410,7 @@ class _KeyViewState extends State<KeyView> {
     }
 
     Widget editableText(int _BatteryRange) {
-      if (_connectedDevice != null && vehicle.sRange > 0) {
+      if (_connectedDevice != null ) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
