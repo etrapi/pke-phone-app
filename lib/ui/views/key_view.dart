@@ -338,8 +338,10 @@ class _KeyViewState extends State<KeyView> {
     _initScanBeacon();
     Timer.periodic(Duration(milliseconds: 5000), (timer) async {
       print(DateTime.now());
-      _writePkeData();
-      _readFbkData();
+      if (_connectedDevice != null) {
+        _writePkeData();
+        _readFbkData();
+      }
     });
     Timer.periodic(Duration(milliseconds: 500), (timer) async {//asynchronous delay
       if (this.mounted) { //checks if widget is still active and not disposed
