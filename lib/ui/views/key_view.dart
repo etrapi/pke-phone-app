@@ -336,7 +336,7 @@ class _KeyViewState extends State<KeyView> {
     _initStreams ();
     _startDevicesDiscovery ();
     _initScanBeacon();
-    Timer.periodic(Duration(milliseconds: 5000), (timer) async {
+    Timer.periodic(Duration(milliseconds: 500), (timer) async {
       print(DateTime.now());
       if (_connectedDevice != null) {
         _writePkeData();
@@ -640,10 +640,10 @@ class _KeyViewState extends State<KeyView> {
             SizedBox(height: 18),
             //if (_connectedDevice == null)
             //else
-              if (_connectedDevice != null && vehicle.rSoC > 0) CircularPercentIndicator(
+              if (_connectedDevice != null) CircularPercentIndicator(
               progressColor: currentProgressColor((vehicle.rSoC.toInt())),
               backgroundColor: Color(0x884676),
-              percent: _vehicle.rSoC / 100,
+              percent: _vehicle.rSoC / 100.0,
               animation: true,
               radius: 75.0,
               lineWidth: 2.0,
