@@ -82,7 +82,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:490100302563:android:317ab33e9ac0754cd81bd6",
         "android_client_info": {
-          "package_name": "com.qevtech.hispanosuizaapp",
+          "package_name": "com.qevtech.hispanosuizaapp"
         }
       },
       "oauth_client": [

@@ -1,4 +1,4 @@
-package com.example.hispanosuizaapp
+package com.qevtech.hispanosuizaapp
 
 import io.flutter.embedding.android.FlutterActivity
 
