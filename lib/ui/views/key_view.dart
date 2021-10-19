@@ -250,6 +250,7 @@ class _KeyViewState extends State<KeyView> {
           }
         }
       }
+      print(_pkeData.toString());
     }
     var retry = 0;
     do {
@@ -336,7 +337,7 @@ class _KeyViewState extends State<KeyView> {
     _initStreams ();
     _startDevicesDiscovery ();
     _initScanBeacon();
-    Timer.periodic(Duration(milliseconds: 500), (timer) async {
+    Timer.periodic(Duration(milliseconds: 2000), (timer) async {
       print(DateTime.now());
       if (_connectedDevice != null) {
         _writePkeData();
@@ -376,8 +377,8 @@ class _KeyViewState extends State<KeyView> {
         if (label == "key.lights") _writeCmdData (6,0);
         if (label == "key.ldoor") _writeCmdData (1,0);
         if (label == "key.rdoor") _writeCmdData (2,0);
-        if (label == "key.bonnet") _writeCmdData (5,0);
-        if (label == "key.boot") _writeCmdData (4,0);
+        if (label == "key.bonnet") _writeCmdData (4,0);
+        if (label == "key.boot") _writeCmdData (5,0);
       }
     }
 
@@ -692,7 +693,7 @@ class _KeyViewState extends State<KeyView> {
             _buildButtonColumn(Colors.white, Icons.lightbulb_outline,
                 'key.lights', 12.0, 30.0, 20.0),
             _buildButtonColumn(Colors.white, Typicons.warning_outline,
-                'key.warning', 12.0, 35.0, 17.5),
+                'key.warning', 12.0, 30.0, 20),
             _buildButtonColumn(Colors.white, Icons.electrical_services,
                 'key.inlet', 12.0, 30.0, 20.0),
             //Vehicle Locked
