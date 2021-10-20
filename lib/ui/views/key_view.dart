@@ -1,6 +1,5 @@
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -165,19 +164,19 @@ class _KeyViewState extends State<KeyView> {
     await flutterBeacon.initializeScanning;
     final regions = <Region>[];
     regions.add(Region(
-        identifier: 'PKEAnchor1',
+        identifier: 'PKE1',
         proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e31' + vehicleId));
     regions.add(Region(
-        identifier: 'PKEAnchor2',
+        identifier: 'PKE2',
         proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e32'+ vehicleId));
     regions.add(Region(
-        identifier: 'PKEAnchor3',
+        identifier: 'PKE3',
         proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e33'+ vehicleId));
     regions.add(Region(
-        identifier: 'PKEAnchor4',
+        identifier: 'PKE4',
         proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e34' + vehicleId));
     regions.add(Region(
-        identifier: 'PKEAnchor5',
+        identifier: 'PKE5',
         proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e35'+ vehicleId));
 
     if (_streamRanging != null) {
@@ -233,20 +232,20 @@ class _KeyViewState extends State<KeyView> {
           Beacon element = _beacons[j];
           if (element.proximityUUID.contains(
               "D9B9EC1F-3925-43D0-80A9-1E31" + vehicleId)) {
-            _pkeData[0] = element.rssi;
+            _pkeData[0] = element.rssi < 0 ? element.rssi : -50;
           } else if (element.proximityUUID.contains(
               "D9B9EC1F-3925-43D0-80A9-1E32" + vehicleId)) {
             _iBeaconCentralRx = true;
-            _pkeData[1] = element.rssi;
+            _pkeData[1] = element.rssi < 0 ? element.rssi : -50;
           } else if (element.proximityUUID.contains(
               "D9B9EC1F-3925-43D0-80A9-1E33" + vehicleId)) {
-            _pkeData[2] = element.rssi;
+            _pkeData[2] = element.rssi < 0 ? element.rssi : -50;
           } else if (element.proximityUUID.contains(
               "D9B9EC1F-3925-43D0-80A9-1E34" + vehicleId)) {
-            _pkeData[3] = element.rssi;
+            _pkeData[3] = element.rssi < 0 ? element.rssi : -50;
           } else if (element.proximityUUID.contains(
               "D9B9EC1F-3925-43D0-80A9-1E35" + vehicleId)) {
-            _pkeData[4] = element.rssi;
+            _pkeData[4] = element.rssi < 0 ? element.rssi : -50;
           }
         }
       }
