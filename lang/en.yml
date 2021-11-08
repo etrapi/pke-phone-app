@@ -16,10 +16,15 @@ login:
 
 settings:
   signout: SIGN OUT
+  units: UNITS
+  km: km
+  miles: miles
 
 key:
   charging:  CHARGING...
-  range:  mi RANGE
+  range:  RANGE
+  km: km
+  miles: mi
   warning: WARNING
   honk: HONK
   lock: LOCK

@@ -131,7 +131,7 @@ class _LoginViewState extends State<LoginView> {
                                 style: TextStyle(
                                     color: Colors.red,
                                     fontFamily: 'Dinpro',
-                                    fontSize: 18),
+                                    fontSize: 16),
                               ),
                             SizedBox(
                               height: 55,

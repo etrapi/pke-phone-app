@@ -28,7 +28,7 @@ class KeyView extends StatefulWidget {
 }
 
 class _KeyViewState extends State<KeyView> {
-  bool _demo = true; //Turn on demo mode
+  bool _demo = false;
   final myController = TextEditingController();
   BluetoothDevice _connectedDevice;
   BluetoothCharacteristic _pkeCharacteristic;
@@ -45,6 +45,12 @@ class _KeyViewState extends State<KeyView> {
   int count = 0;
   Vehicle vehicle = Vehicle();
   bool _warningsVisible = false;
+  bool _unitskm = true;
+
+  _getUnits() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _unitskm = (prefs.getBool('units') ?? true);
+  }
 
   _getDemoMode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -279,9 +285,8 @@ class _KeyViewState extends State<KeyView> {
         retry++;
         //throw e;
       }
-    } while (retry < 10);
-    if (retry == 10) await _resetConnection();
-    if (retry == 10) await _resetConnection();
+    } while (retry < 5);
+    if (retry == 5) await _resetConnection();
 
   }
 
@@ -305,8 +310,8 @@ class _KeyViewState extends State<KeyView> {
         retry++;
         //throw e;
       }
-    } while (retry < 5);
-    if (retry == 5) await _resetConnection();
+    } while (retry < 10);
+    if (retry == 10) await _resetConnection();
   }
 
   _readFbkData() async {
@@ -358,6 +363,8 @@ class _KeyViewState extends State<KeyView> {
   @override
   void initState() {
     super.initState();
+    _getDemoMode();
+    _getUnits();
     _initStreams();
     _startDevicesDiscovery();
     _initScanBeacon();
@@ -392,7 +399,7 @@ class _KeyViewState extends State<KeyView> {
     VehicleProvider _vehicleProvider = Provider.of<VehicleProvider>(context);
 
     //Vehicle vehicle_provider = _vehicleProvider.vehicle;
-    _getDemoMode();
+
     //print("Demo Mode: " + _demo.toString());
     void _buttonClick(String label) {
       print("Button: " + label + " is clicked");
@@ -447,29 +454,33 @@ class _KeyViewState extends State<KeyView> {
     }
 
     Widget editableText(int _BatteryRange) {
+      num _range = _BatteryRange;
+      var _rangeUnits = localizations.t('key.km') ;
+      if (!_unitskm) _range = _range * 0.621371;
+      if (!_unitskm) _rangeUnits = localizations.t('key.miles');
       if (_connectedDevice != null) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _BatteryRange.toString(),
-              style: TextStyle(fontSize: 13.0, color: Colors.white),
-            ),
-            Text(
-              localizations.t('key.range'),
-              style: TextStyle(fontSize: 13.0, color: Colors.white),
-            ),
-            //TODO: A PARTIR DE AQUÍ SOLO CUANDO EL VEHICULO ESTÉ CARGANDO!!!!!
-            SizedBox(width: 10),
-            if (vehicle.BCharging)
-              Image.asset(
-                'assets/mipmap/mipmap-hdpi/ic_home_power.png',
-                scale: 6.0,
-                color: Colors.tealAccent,
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _range.toString(),
+                style: TextStyle(fontSize: 13.0, color: Colors.white),
               ),
-            SizedBox(width: 2),
-          ],
-        );
+              Text(
+                _rangeUnits + " " + localizations.t('key.range') ,
+                style: TextStyle(fontSize: 13.0, color: Colors.white),
+              ),
+              //TODO: A PARTIR DE AQUÍ SOLO CUANDO EL VEHICULO ESTÉ CARGANDO!!!!!
+              SizedBox(width: 10),
+              if (vehicle.BCharging)
+                Image.asset(
+                  'assets/mipmap/mipmap-hdpi/ic_home_power.png',
+                  scale: 6.0,
+                  color: Colors.tealAccent,
+                ),
+              SizedBox(width: 2),
+            ],
+          );
       } else {
         if (_demo) {
           return Column(

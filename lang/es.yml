@@ -16,10 +16,15 @@ login:
 
 settings:
   signout: CERRAR SESIÓN
+  units: UNIDADES
+  km: km
+  miles: millas
 
 key:
   charging:  CARGANDO...
-  range:  km RANGO
+  range:  RANGO
+  km: km
+  miles: mi
   warning: ALERTA
   honk: CLAXON
   lock: BLOQUEAR
