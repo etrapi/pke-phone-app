@@ -139,8 +139,7 @@ class _KeyViewState extends State<KeyView> {
             }
           }
       }
-      _setDemoMode(
-          false); //Once connected to a car will store on local storage demo = false
+      _setDemoMode(false); //Once connected to a car will store on local storage demo = false
       setState(() {
         _connectedDevice = device;
         print("El puto dispositivo conectado se llama:" + device.name);
@@ -152,6 +151,7 @@ class _KeyViewState extends State<KeyView> {
   }
 
   _resetConnection() async {
+    print("reset conection") ;
     if (_connectedDevice != null) {
       await _connectedDevice.disconnect();
     }
@@ -275,11 +275,14 @@ class _KeyViewState extends State<KeyView> {
         retry++;
       } catch (e) {
         print("PKE Write Exception: " + e.toString());
-        await _resetConnection();
+        //await _resetConnection();
         retry++;
         //throw e;
       }
     } while (retry < 10);
+    if (retry == 10) await _resetConnection();
+    if (retry == 10) await _resetConnection();
+
   }
 
   _writeCmdData(int cmd, int payload) async {
@@ -298,11 +301,12 @@ class _KeyViewState extends State<KeyView> {
         retry++;
       } catch (e) {
         print("CMD Write Exception " + e.toString());
-        await _resetConnection();
+        //await _resetConnection();
         retry++;
         //throw e;
       }
-    } while (retry < 3);
+    } while (retry < 5);
+    if (retry == 5) await _resetConnection();
   }
 
   _readFbkData() async {
@@ -342,7 +346,9 @@ class _KeyViewState extends State<KeyView> {
       } catch (e) {
         print("FBK Read Exception " + e.toString());
       }
+      print(retry);
     } while (retry < 5);
+    if (retry == 5) await _resetConnection();
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -387,7 +393,7 @@ class _KeyViewState extends State<KeyView> {
 
     //Vehicle vehicle_provider = _vehicleProvider.vehicle;
     _getDemoMode();
-    print("Demo Mode: " + _demo.toString());
+    //print("Demo Mode: " + _demo.toString());
     void _buttonClick(String label) {
       print("Button: " + label + " is clicked");
       if (_demo) {
