@@ -5,14 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_beacon/flutter_beacon.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:hispanosuizaapp/providers/local_storage_provider.dart';
 import 'package:hispanosuizaapp/providers/vehicle_provider.dart';
+import 'package:hispanosuizaapp/ui/views/settings_view.dart';
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:typicons_flutter/typicons_flutter.dart';
 import 'package:hispanosuizaapp/core/models/vehicle_model.dart';
+import 'package:hispanosuizaapp/core/models/user.dart';
 import 'package:hispanosuizaapp/app_localizations.dart';
-
 
 //TODO: Separar servicio Ble de UI y pasar el provider Vehículo al UI
 class KeyView extends StatefulWidget {
@@ -35,7 +38,7 @@ class _KeyViewState extends State<KeyView> {
   StreamSubscription<RangingResult> _streamRanging;
   final _regionBeacons = <Region, List<Beacon>>{};
   final _beacons = <Beacon>[];
-  final _commands = <bool> [];
+  final _commands = <bool>[];
   bool _isScanning = false;
   int keyId = 0x0A;
   String vehicleId = '00000003';
@@ -43,34 +46,46 @@ class _KeyViewState extends State<KeyView> {
   Vehicle vehicle = Vehicle();
   bool _warningsVisible = false;
 
-  _initStreams () {
-    widget.flutterBlue.isScanning
-        .listen((p) => setState(() => _isScanning = p),);
+  _getDemoMode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _demo = (prefs.getBool('demo') ?? true);
+    });
+  }
+
+  _setDemoMode(bool demo) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("demo", demo);
+  }
+
+  _initStreams() {
+    widget.flutterBlue.isScanning.listen(
+      (p) => setState(() => _isScanning = p),
+    );
     //widget.flutterBlue.state.listen((event) {print ("evento: " + event.toString());});
     widget.flutterBlue.connectedDevices
         .asStream()
         .listen((List<BluetoothDevice> devices) {
       for (BluetoothDevice device in devices) {
         _addDeviceTolist(device);
-        print ("Nombre de dispositivo" + device.name);
+        print("Nombre de dispositivo" + device.name);
       }
-    }
-    );
+    });
     widget.flutterBlue.scanResults.listen((List<ScanResult> results) {
       BluetoothDevice pke;
       for (ScanResult result in results) {
         _addDeviceTolist(result.device);
         if (result.device.name == 'PKE2') pke = result.device;
       }
-      print ("busco PKE");
-      if (pke!=null){
-        print ("encuentro el PKE");
-        _connectDevice (pke);
+      print("busco PKE");
+      if (pke != null) {
+        print("encuentro el PKE");
+        _connectDevice(pke);
       }
     });
   }
 
-  _startDevicesDiscovery()  {
+  _startDevicesDiscovery() {
     if (!_isScanning) {
       widget.flutterBlue.startScan();
       print("Discovery Services ON");
@@ -92,62 +107,59 @@ class _KeyViewState extends State<KeyView> {
     try {
       await device.connect();
     } catch (e) {
-
       if (e.code != 'already_connected') {
         throw e;
       }
     } finally {
       _services = await device.discoverServices();
       for (BluetoothService service in _services) {
-        if (service.uuid == Guid("d9b9ec1f-3925-43d0-80a9-1e00"+vehicleId))
+        if (service.uuid == Guid("d9b9ec1f-3925-43d0-80a9-1e00" + vehicleId))
           for (BluetoothCharacteristic characteristic
-          in service.characteristics) {
+              in service.characteristics) {
             print('(S1)' + service.uuid.toString());
             if (characteristic.uuid ==
-                Guid("d9b9ec1f-3925-43d0-80a9-1e11"+vehicleId)) {
+                Guid("d9b9ec1f-3925-43d0-80a9-1e11" + vehicleId)) {
               _chpke = characteristic;
               print('  (S1C1)' + characteristic.uuid.toString());
             }
           }
-        else if (service.uuid == Guid("d9b9ec1f-3925-43d0-80a9-1e01"+vehicleId))
+        else if (service.uuid ==
+            Guid("d9b9ec1f-3925-43d0-80a9-1e01" + vehicleId))
           for (BluetoothCharacteristic characteristic
-          in service.characteristics) {
+              in service.characteristics) {
             print('(S2)' + service.uuid.toString());
             if (characteristic.uuid ==
-                Guid("d9b9ec1f-3925-43d0-80a9-1e21"+vehicleId)) {
+                Guid("d9b9ec1f-3925-43d0-80a9-1e21" + vehicleId)) {
               _chcmd = characteristic;
               print('  (S2C1)' + characteristic.uuid.toString());
-            }
-            else if (characteristic.uuid ==
-                Guid("d9b9ec1f-3925-43d0-80a9-1e22"+vehicleId)) {
-                _chfbk = characteristic;
-                print('  (S2C2)' + characteristic.uuid.toString());
+            } else if (characteristic.uuid ==
+                Guid("d9b9ec1f-3925-43d0-80a9-1e22" + vehicleId)) {
+              _chfbk = characteristic;
+              print('  (S2C2)' + characteristic.uuid.toString());
             }
           }
       }
-
+      _setDemoMode(
+          false); //Once connected to a car will store on local storage demo = false
       setState(() {
         _connectedDevice = device;
-        print ("El puto dispositivo conectado se llama:" + device.name);
+        print("El puto dispositivo conectado se llama:" + device.name);
         _pkeCharacteristic = _chpke;
         _cmdCharacteristic = _chcmd;
         _fbkCharacteristic = _chfbk;
-
       });
     }
-
   }
 
   _resetConnection() async {
     if (_connectedDevice != null) {
       await _connectedDevice.disconnect();
     }
-    await _startDevicesDiscovery ();
+    await _startDevicesDiscovery();
     setState(() {
       _connectedDevice = null;
       _pkeCharacteristic = null;
     });
-
   }
 
   _addDeviceTolist(final BluetoothDevice device) {
@@ -168,16 +180,16 @@ class _KeyViewState extends State<KeyView> {
         proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e31' + vehicleId));
     regions.add(Region(
         identifier: 'PKE2',
-        proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e32'+ vehicleId));
+        proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e32' + vehicleId));
     regions.add(Region(
         identifier: 'PKE3',
-        proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e33'+ vehicleId));
+        proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e33' + vehicleId));
     regions.add(Region(
         identifier: 'PKE4',
         proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e34' + vehicleId));
     regions.add(Region(
         identifier: 'PKE5',
-        proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e35'+ vehicleId));
+        proximityUUID: 'd9b9ec1f-3925-43d0-80a9-1e35' + vehicleId));
 
     if (_streamRanging != null) {
       if (_streamRanging.isPaused) {
@@ -188,17 +200,17 @@ class _KeyViewState extends State<KeyView> {
 
     _streamRanging =
         flutterBeacon.ranging(regions).listen((RangingResult result) {
-          if (result != null && mounted) {
-            setState(() {
-              _regionBeacons[result.region] = result.beacons;
-              _beacons.clear();
-              _regionBeacons.values.forEach((list) {_beacons.addAll(list);
-              });
-              _beacons.sort(_compareParameters);
-
-            });
-          }
+      if (result != null && mounted) {
+        setState(() {
+          _regionBeacons[result.region] = result.beacons;
+          _beacons.clear();
+          _regionBeacons.values.forEach((list) {
+            _beacons.addAll(list);
+          });
+          _beacons.sort(_compareParameters);
         });
+      }
+    });
   }
 
   pauseScanBeacon() async {
@@ -223,28 +235,29 @@ class _KeyViewState extends State<KeyView> {
 
     return compare;
   }
-  _writePkeData ()  async {
+
+  _writePkeData() async {
     List<int> _pkeData = [-128, -128, -128, -128, -128, keyId];
     bool _iBeaconCentralRx = false; //add timeout 5s
-    if(_connectedDevice !=null && _pkeCharacteristic != null) {
+    if (_connectedDevice != null && _pkeCharacteristic != null) {
       if (_beacons.isNotEmpty) {
         for (int j = 0; j < _beacons.length; j++) {
           Beacon element = _beacons[j];
-          if (element.proximityUUID.contains(
-              "D9B9EC1F-3925-43D0-80A9-1E31" + vehicleId)) {
+          if (element.proximityUUID
+              .contains("D9B9EC1F-3925-43D0-80A9-1E31" + vehicleId)) {
             _pkeData[0] = element.rssi < 0 ? element.rssi : -50;
-          } else if (element.proximityUUID.contains(
-              "D9B9EC1F-3925-43D0-80A9-1E32" + vehicleId)) {
+          } else if (element.proximityUUID
+              .contains("D9B9EC1F-3925-43D0-80A9-1E32" + vehicleId)) {
             _iBeaconCentralRx = true;
             _pkeData[1] = element.rssi < 0 ? element.rssi : -50;
-          } else if (element.proximityUUID.contains(
-              "D9B9EC1F-3925-43D0-80A9-1E33" + vehicleId)) {
+          } else if (element.proximityUUID
+              .contains("D9B9EC1F-3925-43D0-80A9-1E33" + vehicleId)) {
             _pkeData[2] = element.rssi < 0 ? element.rssi : -50;
-          } else if (element.proximityUUID.contains(
-              "D9B9EC1F-3925-43D0-80A9-1E34" + vehicleId)) {
+          } else if (element.proximityUUID
+              .contains("D9B9EC1F-3925-43D0-80A9-1E34" + vehicleId)) {
             _pkeData[3] = element.rssi < 0 ? element.rssi : -50;
-          } else if (element.proximityUUID.contains(
-              "D9B9EC1F-3925-43D0-80A9-1E35" + vehicleId)) {
+          } else if (element.proximityUUID
+              .contains("D9B9EC1F-3925-43D0-80A9-1E35" + vehicleId)) {
             _pkeData[4] = element.rssi < 0 ? element.rssi : -50;
           }
         }
@@ -259,18 +272,17 @@ class _KeyViewState extends State<KeyView> {
         break;
       } on PlatformException {
         await Future.delayed(Duration(milliseconds: 100));
-        retry ++;
+        retry++;
       } catch (e) {
         print("PKE Write Exception: " + e.toString());
         await _resetConnection();
-        retry ++;
+        retry++;
         //throw e;
       }
     } while (retry < 10);
   }
 
-
-  _writeCmdData (int cmd, int payload) async {
+  _writeCmdData(int cmd, int payload) async {
     List<int> _cmdData = [0, 0];
     var retry = 0;
     do {
@@ -283,14 +295,14 @@ class _KeyViewState extends State<KeyView> {
       } on PlatformException {
         await Future.delayed(Duration(milliseconds: 50));
         print("CMD pattform exception");
-        retry ++;
+        retry++;
       } catch (e) {
         print("CMD Write Exception " + e.toString());
         await _resetConnection();
-        retry ++;
+        retry++;
         //throw e;
       }
-    }while (retry < 3);
+    } while (retry < 3);
   }
 
   _readFbkData() async {
@@ -302,22 +314,25 @@ class _KeyViewState extends State<KeyView> {
         count++;
         if (_fbkCharacteristic.properties.read) {
           List<int> data = await _fbkCharacteristic.read();
-            setState(() {
-              if (data[0] >= 0 && data[0] <=7) vehicle.NDoorDriverStatus = data[0];
-              if (data[1] >= 0 && data[1] <=7) vehicle.NDoorPaxStatus = data[1];
-              if (data[2] >= 0 && data[2] <=7) vehicle.NBonnetStatus = data[2];
-              if (data[3] >= 0 && data[3] <=7) vehicle.NBootStatus= data[3];
-              if (data[4] >= 0 && data[4] <=7) vehicle.NChargerCapStatus = data[4];
-              if (data[5] >= 0 && data[5] <=7) vehicle.NLowBeamHeadStatus = data[5];
-              if (data[6] >= 0 && data[6] <=7) vehicle.NWarningLightStatus = data[6];
-              vehicle.BCharging =  (data[7]) == 0 ? false : true;
-              num _rSoC = (data[8] * 0.5);
-              if (_rSoC > 0.0 && _rSoC <= 100.0) vehicle.rSoC = _rSoC;
-              num _range = ((data[9] * 256 + data[10]) * 0.01).toInt();
-              if (_range >= 0 && _range <=1000) vehicle.sRange = _range;
-            });
-            print("received value: " + data.toString());
-
+          setState(() {
+            if (data[0] >= 0 && data[0] <= 7)
+              vehicle.NDoorDriverStatus = data[0];
+            if (data[1] >= 0 && data[1] <= 7) vehicle.NDoorPaxStatus = data[1];
+            if (data[2] >= 0 && data[2] <= 7) vehicle.NBonnetStatus = data[2];
+            if (data[3] >= 0 && data[3] <= 7) vehicle.NBootStatus = data[3];
+            if (data[4] >= 0 && data[4] <= 7)
+              vehicle.NChargerCapStatus = data[4];
+            if (data[5] >= 0 && data[5] <= 7)
+              vehicle.NLowBeamHeadStatus = data[5];
+            if (data[6] >= 0 && data[6] <= 7)
+              vehicle.NWarningLightStatus = data[6];
+            vehicle.BCharging = (data[7]) == 0 ? false : true;
+            num _rSoC = (data[8] * 0.5);
+            if (_rSoC > 0.0 && _rSoC <= 100.0) vehicle.rSoC = _rSoC;
+            num _range = ((data[9] * 256 + data[10]) * 0.01).toInt();
+            if (_range >= 0 && _range <= 1000) vehicle.sRange = _range;
+          });
+          print("received value: " + data.toString());
         }
         break;
       } on PlatformException {
@@ -330,24 +345,36 @@ class _KeyViewState extends State<KeyView> {
     } while (retry < 5);
   }
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //                                               UI                                                                   //
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   @override
   void initState() {
     super.initState();
-    _initStreams ();
-    _startDevicesDiscovery ();
+    _initStreams();
+    _startDevicesDiscovery();
     _initScanBeacon();
     Timer.periodic(Duration(milliseconds: 2000), (timer) async {
-      print(DateTime.now());
-      if (_connectedDevice != null) {
-        _writePkeData();
-        _readFbkData();
+      if (this.mounted) {
+        print(DateTime.now());
+        if (_connectedDevice != null) {
+          _writePkeData();
+          _readFbkData();
+        }
       }
     });
-    Timer.periodic(Duration(milliseconds: 500), (timer) async {//asynchronous delay
-      if (this.mounted) { //checks if widget is still active and not disposed
-        setState(() { //tells the widget builder to rebuild again because ui has updated
-          if (!_warningsVisible) _warningsVisible=true;
-          else _warningsVisible=false;//update the variable declare this under your class so its accessible for both your widget build and initState which is located under widget build{}
+    Timer.periodic(Duration(milliseconds: 500), (timer) async {
+      //asynchronous delay
+      if (this.mounted) {
+        //checks if widget is still active and not disposed
+        setState(() {
+          //tells the widget builder to rebuild again because ui has updated
+          if (!_warningsVisible)
+            _warningsVisible = true;
+          else
+            _warningsVisible =
+                false; //update the variable declare this under your class so its accessible for both your widget build and initState which is located under widget build{}
         });
       }
     });
@@ -357,9 +384,10 @@ class _KeyViewState extends State<KeyView> {
   Widget build(BuildContext context) {
     AppLocalizations localizations = AppLocalizations.of(context);
     VehicleProvider _vehicleProvider = Provider.of<VehicleProvider>(context);
+
     //Vehicle vehicle_provider = _vehicleProvider.vehicle;
-    if (_connectedDevice != null) _demo=false;
-    else _demo = true;
+    _getDemoMode();
+    print("Demo Mode: " + _demo.toString());
     void _buttonClick(String label) {
       print("Button: " + label + " is clicked");
       if (_demo) {
@@ -371,27 +399,28 @@ class _KeyViewState extends State<KeyView> {
         if (label == "key.bonnet") vehicle.cmdBonnet();
         if (label == "key.boot") vehicle.cmdBoot();
       } else {
-        if (label == "key.inlet") _writeCmdData (7,0);
-        if (label == "key.warning") _writeCmdData (3,0);
-        if (label == "key.lights") _writeCmdData (6,0);
-        if (label == "key.ldoor") _writeCmdData (1,0);
-        if (label == "key.rdoor") _writeCmdData (2,0);
-        if (label == "key.bonnet") _writeCmdData (4,0);
-        if (label == "key.boot") _writeCmdData (5,0);
+        if (label == "key.inlet") _writeCmdData(7, 0);
+        if (label == "key.stopCharge") _writeCmdData(8, 0);
+        if (label == "key.warning") _writeCmdData(3, 0);
+        if (label == "key.lights") _writeCmdData(6, 0);
+        if (label == "key.ldoor") _writeCmdData(1, 0);
+        if (label == "key.rdoor") _writeCmdData(2, 0);
+        if (label == "key.bonnet") _writeCmdData(4, 0);
+        if (label == "key.boot") _writeCmdData(5, 0);
       }
     }
 
-    Column _buildButtonColumn(Color color, IconData icon, String label,
-        double fsize, double isize, double margin) {
+    Column _buildButtonColumn(Color iconColor, Color circleColor, IconData icon,
+        String label, double fsize, double isize, double margin) {
       return Column(children: [
         FlatButton(
           shape: CircleBorder(
-            side: BorderSide(color: Colors.grey),
+            side: BorderSide(color: circleColor),
           ),
           onPressed: () => {_buttonClick(label)},
           child: Icon(
             icon,
-            color: color,
+            color: iconColor,
             size: isize,
           ),
           highlightColor: Colors.blueGrey,
@@ -404,7 +433,7 @@ class _KeyViewState extends State<KeyView> {
             style: TextStyle(
               fontSize: fsize,
               fontWeight: FontWeight.w400,
-              color: color,
+              color: iconColor,
             ),
           ),
         ),
@@ -412,7 +441,7 @@ class _KeyViewState extends State<KeyView> {
     }
 
     Widget editableText(int _BatteryRange) {
-      if (_connectedDevice != null ) {
+      if (_connectedDevice != null) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -433,21 +462,34 @@ class _KeyViewState extends State<KeyView> {
                 color: Colors.tealAccent,
               ),
             SizedBox(width: 2),
-            if (vehicle.BCharging)
-              Text(
-                //"cNG...",
-                localizations.t('key.charging'),
-                style: TextStyle(fontSize: 13.0, color: Colors.tealAccent),
-              ),
           ],
         );
-      }else {
-        return Center(
-          child: Text(
-            localizations.t('key.blesearch'),
-            style: TextStyle(fontSize: 13.0, color: Colors.white),
-          ),
-        );
+      } else {
+        if (_demo) {
+          return Column(
+            children: [
+              Center(
+                child: Text(
+                  localizations.t('key.demomode1'),
+                  style: TextStyle(fontSize: 13.0, color: Colors.tealAccent),
+                ),
+              ),
+              Center(
+                child: Text(
+                  localizations.t('key.demomode2'),
+                  style: TextStyle(fontSize: 13.0, color: Colors.tealAccent),
+                ),
+              ),
+            ],
+          );
+        } else {
+          return Center(
+              child: Text(
+              localizations.t('key.blesearch'),
+              style: TextStyle(fontSize: 13.0, color: Colors.white),
+              )
+           );
+        }
       }
     }
 
@@ -455,24 +497,25 @@ class _KeyViewState extends State<KeyView> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.08,
+          ),
           Container(
             //color: Colors.blue,
-            height: MediaQuery.of(context).size.height * 0.20,
+            height: MediaQuery.of(context).size.height * 0.10,
             width: MediaQuery.of(context).size.width * 0.33,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: _demo ? Colors.tealAccent : Colors.transparent,
-              )
-            ),
+                border: Border.all(
+              color: _demo ? Colors.tealAccent : Colors.transparent,
+            )),
             child: Material(
                 color: Colors.transparent,
                 child: InkResponse(
                     borderRadius: BorderRadius.circular(200),
-                    splashColor:  Colors.tealAccent.withOpacity(0.25),
+                    splashColor: Colors.tealAccent.withOpacity(0.25),
                     highlightColor: Colors.transparent,
                     containedInkWell: true,
-                    onTap: () => _buttonClick('key.bonnet'))
-            ),
+                    onTap: () => _buttonClick('key.bonnet'))),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Container(
@@ -491,8 +534,7 @@ class _KeyViewState extends State<KeyView> {
                       splashColor: Colors.tealAccent.withOpacity(0.25),
                       highlightColor: Colors.transparent,
                       containedInkWell: true,
-                      onTap: () => _buttonClick('key.ldoor'))
-              ),
+                      onTap: () => _buttonClick('key.ldoor'))),
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.15,
@@ -510,11 +552,11 @@ class _KeyViewState extends State<KeyView> {
                       splashColor: Colors.tealAccent.withOpacity(0.25),
                       highlightColor: Colors.transparent,
                       containedInkWell: true,
-                      onTap: () =>  _buttonClick('key.rdoor'))),
+                      onTap: () => _buttonClick('key.rdoor'))),
             )
           ]),
           Container(
-            height: MediaQuery.of(context).size.height * 0.15,
+            height: MediaQuery.of(context).size.height * 0.17,
             width: MediaQuery.of(context).size.width * 0.33,
             decoration: BoxDecoration(
               border: Border.all(
@@ -529,15 +571,15 @@ class _KeyViewState extends State<KeyView> {
                     splashColor: Colors.tealAccent.withOpacity(0.25),
                     highlightColor: Colors.transparent,
                     containedInkWell: true,
-                    onTap: () =>  _buttonClick('key.boot'))),
+                    onTap: () => _buttonClick('key.boot'))),
           ),
+
         ],
       );
     }
 
     Widget getStack(Vehicle _vehicle) {
-      String assetLights =
-          'assets/mipmap/mipmap-hdpi/Key_View/low_beam.png';
+      String assetLights = 'assets/mipmap/mipmap-hdpi/Key_View/low_beam.png';
       String assetWarnings =
           'assets/mipmap/mipmap-hdpi/Key_View/warnings_lights_1900.png';
       String assetCarLeft =
@@ -559,48 +601,39 @@ class _KeyViewState extends State<KeyView> {
         height: MediaQuery.of(context).size.height * 0.50,
         child: Stack(children: [
           Container(
-              alignment: Alignment.center,
-              child: Image.asset(assetCarClosed)),
+              alignment: Alignment.center, child: Image.asset(assetCarClosed)),
           if (_vehicle.NDoorDriverStatus == 1)
             Container(
-                alignment: Alignment.center,
-                child: Image.asset(assetCarLeft)),
+                alignment: Alignment.center, child: Image.asset(assetCarLeft)),
           if (_vehicle.NDoorPaxStatus == 1)
             Container(
-                alignment: Alignment.center,
-                child: Image.asset(assetCarRight)),
+                alignment: Alignment.center, child: Image.asset(assetCarRight)),
           if (_vehicle.NBonnetStatus == 1)
             Container(
-                alignment: Alignment.center,
-                child: Image.asset(assetCarFront)),
+                alignment: Alignment.center, child: Image.asset(assetCarFront)),
           if (_vehicle.NBootStatus == 1)
             Container(
-                alignment: Alignment.center,
-                child: Image.asset(assetCarBack)),
+                alignment: Alignment.center, child: Image.asset(assetCarBack)),
           if (_vehicle.NLowBeamHeadStatus == 1)
             Container(
                 alignment: Alignment.topCenter,
-                child: Image.asset(assetLights)
-              ),
+                child: Image.asset(assetLights)),
 
           if (_vehicle.NWarningLightStatus == 1)
             AnimatedOpacity(
-              // If the widget is visible, animate to 0.0 (invisible).
-              // If the widget is hidden, animate to 1.0 (fully visible).
+                // If the widget is visible, animate to 0.0 (invisible).
+                // If the widget is hidden, animate to 1.0 (fully visible).
                 opacity: _warningsVisible ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 500),
                 // The green box must be a child of the AnimatedOpacity widget.
                 child: Container(
-                alignment: Alignment.center,
-                child: Image.asset(assetWarnings))
-            ),
+                    alignment: Alignment.center,
+                    child: Image.asset(assetWarnings))),
           if (_vehicle.NChargerCapStatus == 1)
             Container(
                 alignment: Alignment.center,
-                child: Opacity(
-                    opacity: 0.6,
-                    child: Image.asset(assetCarCharger))
-            ),
+                child:
+                    Opacity(opacity: 0.6, child: Image.asset(assetCarCharger))),
           // if (_connectedDevice!=null) Container(
           //     alignment: Alignment.center,
           //     child:
@@ -611,6 +644,7 @@ class _KeyViewState extends State<KeyView> {
           // )
           //,
           getTouchAreas(),
+
         ]),
       );
     }
@@ -630,35 +664,61 @@ class _KeyViewState extends State<KeyView> {
       return Container(
         height: 150.0,
         alignment: Alignment.topCenter,
-        padding: const EdgeInsets.only(top: 15.0),
+        padding: const EdgeInsets.only(top: 10.0),
         child: Stack(children: [
-          if (_connectedDevice == null )
-              Center(child: SizedBox( width: 72, height: 72, child: CircularProgressIndicator(strokeWidth: 1.8,))),
-          if (_connectedDevice == null )
-              Center(child: SizedBox( width: 72, height: 72, child: Icon (Icons.bluetooth, color: Colors.tealAccent.withOpacity(0.75)))),
+          Container(
+            alignment: Alignment.topRight,
+            padding: EdgeInsets.all(8.0),
+            child: IconButton(
+              icon: const Icon(Icons.settings),
+              color: Colors.white,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsView()),
+                );
+              },
+            ),
+          ),
+          if (_connectedDevice == null)
+            Center(
+                child: SizedBox(
+                    width: 72,
+                    height: 72,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.8,
+                    ))),
+          if (_connectedDevice == null)
+            Center(
+                child: SizedBox(
+                    width: 72,
+                    height: 72,
+                    child: Icon(Icons.bluetooth,
+                        color: Colors.tealAccent.withOpacity(0.75)))),
           Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             SizedBox(height: 18),
             //if (_connectedDevice == null)
             //else
-              if (_connectedDevice != null) CircularPercentIndicator(
-              progressColor: currentProgressColor((vehicle.rSoC.toInt())),
-              backgroundColor: Color(0x884676),
-              percent: _vehicle.rSoC / 100.0,
-              animation: true,
-              radius: 75.0,
-              lineWidth: 2.0,
-              circularStrokeCap: CircularStrokeCap.round,
-              center: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _vehicle.rSoC.toStringAsFixed(0),
-                    style: TextStyle(fontSize: 26.0),
-                  ),
-                  Text("%"),
-                ],
+            if (_connectedDevice != null)
+              CircularPercentIndicator(
+                progressColor: currentProgressColor((vehicle.rSoC.toInt())),
+                backgroundColor: Color(0x884676),
+                percent: _vehicle.rSoC / 100.0,
+                animation: true,
+                radius: 75.0,
+                lineWidth: 2.0,
+                circularStrokeCap: CircularStrokeCap.round,
+                center: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _vehicle.rSoC.toStringAsFixed(0),
+                      style: TextStyle(fontSize: 26.0),
+                    ),
+                    Text("%"),
+                  ],
+                ),
               ),
-            ),
             Container(
               //padding: const EdgeInsets.all(10),
               child: editableText(_vehicle.sRange.toInt()),
@@ -679,6 +739,12 @@ class _KeyViewState extends State<KeyView> {
             alignment: Alignment.bottomCenter,
             child: getStack(_vehicle),
           ),
+          SizedBox(height: 15),
+        if (_demo)
+          Text(
+          localizations.t('key.demomode3'),
+          style: TextStyle(fontSize: 13.0, color: Colors.tealAccent),
+        ),
         ]),
       );
     }
@@ -689,12 +755,17 @@ class _KeyViewState extends State<KeyView> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildButtonColumn(Colors.white, Icons.lightbulb_outline,
-                'key.lights', 12.0, 30.0, 20.0),
-            _buildButtonColumn(Colors.white, Typicons.warning_outline,
-                'key.warning', 12.0, 30.0, 20),
-            _buildButtonColumn(Colors.white, Icons.electrical_services,
-                'key.inlet', 12.0, 30.0, 20.0),
+            _buildButtonColumn(Colors.white, Colors.grey,
+                Icons.lightbulb_outline, 'key.lights', 12.0, 30.0, 20.0),
+            _buildButtonColumn(Colors.white, Colors.grey,
+                Typicons.warning_outline, 'key.warning', 12.0, 30.0, 20),
+            if (vehicle.BCharging) ...[
+              _buildButtonColumn(Colors.tealAccent, Colors.tealAccent,
+                  Icons.stop_outlined, 'key.stopCharge', 12.0, 36.0, 17.0),
+            ] else ...[
+              _buildButtonColumn(Colors.white, Colors.grey,
+                  Icons.electrical_services, 'key.inlet', 12.0, 30.0, 20.0),
+            ]
             //Vehicle Locked
           ],
         ),

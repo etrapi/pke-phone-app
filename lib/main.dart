@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget   {
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => VehicleProvider()),
-          ChangeNotifierProvider(create: (context) => LocalStorageProvider()),
+          //ChangeNotifierProvider(create: (context) => LocalStorageProvider()),
           ChangeNotifierProvider (create: (context) => LoginProvider()),
         ],
         child: MaterialApp(

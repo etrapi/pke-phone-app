@@ -2,12 +2,10 @@ import 'package:flutter/services.dart';
 import 'package:hispanosuizaapp/core/services/auth_factory.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hispanosuizaapp/core/services/local_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginProvider with ChangeNotifier {
-  FirebaseAuth _auth;
   AuthenticationService _authenticationService;
   AuthenticationServiceFactory _authenticationProviderFactory;
 
@@ -16,21 +14,19 @@ class LoginProvider with ChangeNotifier {
   bool _error = false;
   String _errorStr = '';
 
-  User _user;
-  LocalStorageService localStorage;
+  User user;
 
   LoginProvider({
     @required FirebaseAuth firebaseAuth,
     AuthenticationServiceFactory authenticationProviderFactory = const AuthenticationServiceFactory(),
   }) {
-    _auth = firebaseAuth;
     _authenticationProviderFactory = authenticationProviderFactory;
     setup();
     loginState();
   }
   setup () async  {
-     _user =  FirebaseAuth.instance.currentUser;
-     print ("user: " + _user.uid);
+     user =  FirebaseAuth.instance.currentUser;
+     //print ("user: " + _user.uid);
   }
 
   bool isLoggedIn() => _loggedIn;
@@ -41,7 +37,7 @@ class LoginProvider with ChangeNotifier {
 
   String getError () => _errorStr;
 
- User currentUser() => _user;
+ User currentUser() => user;
 
 
   Future<void> login(AuthService authService, String _user, String _password) async {
@@ -50,9 +46,9 @@ class LoginProvider with ChangeNotifier {
       _authenticationService =
           _authenticationProviderFactory.createAuthService(authService);
       _loading = true;
-      var user = await _authenticationService.handleSignIn(_user, _password);
+      user = await _authenticationService.handleSignIn(_user, _password);
       print("User: " );
-      if (user != null) {
+      if (_user != null) {
         _loading = false;
         _loggedIn = true;
         _error = false;
@@ -63,7 +59,7 @@ class LoginProvider with ChangeNotifier {
         _errorStr = 'Logging error';
       }
       notifyListeners();
-    }  on PlatformException catch (e) {
+    }  on FirebaseAuthException catch (e) {
       _error = true;
       _errorStr = e.code;
       notifyListeners();
@@ -89,7 +85,7 @@ class LoginProvider with ChangeNotifier {
   void loginState() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     if (_prefs.containsKey('isLoggedIn')) {
-      _loggedIn = _user != null;
+      _loggedIn = user != null;
       _loading = false;
       notifyListeners();
     } else {

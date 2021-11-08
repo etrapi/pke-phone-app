@@ -6,6 +6,7 @@ import 'package:hispanosuizaapp/providers/login_provider.dart';
 import '../../app_localizations.dart';
 
 class LoginView extends StatefulWidget {
+
   @override
   _LoginViewState createState() => _LoginViewState();
 }
@@ -19,40 +20,43 @@ class _LoginViewState extends State<LoginView> {
 
   String _errorMessage = '';
 
-  String setError(String code) {
-    print("Code: " + code);
-    //TODO: Add all texts to localizations
-    switch (code) {
-      case "":
-        _errorMessage = code;
-        break;
-      case "ERROR_INVALID_EMAIL":
-        _errorMessage = "Your email address appears to be malformed.";
-        break;
-      case "ERROR_WRONG_PASSWORD":
-        _errorMessage = "Your password is wrong.";
-        break;
-      case "ERROR_USER_NOT_FOUND":
-        _errorMessage = "User with this email doesn't exist.";
-        break;
-      case "ERROR_USER_DISABLED":
-        _errorMessage = "User with this email has been disabled.";
-        break;
-      case "ERROR_TOO_MANY_REQUESTS":
-        _errorMessage = "Too many requests. Try again later.";
-        break;
-      case "ERROR_OPERATION_NOT_ALLOWED":
-        _errorMessage = "Signing in with Email and Password is not enabled.";
-        break;
-      default:
-        _errorMessage = "An undefined Error happened.";
-    }
-    return _errorMessage;
-  }
+
 
   @override
   Widget build(BuildContext context) {
     AppLocalizations localizations = AppLocalizations.of(context);
+
+    String setError(String code) {
+        print("Code: " + code);
+        switch (code) {
+          case "":
+            //_errorMessage = localizations.t('login.error');
+            break;
+          case "invalid-email":
+            _errorMessage = localizations.t('errors.ERROR_INVALID_EMAIL');
+            break;
+          case "wrong-password":
+            _errorMessage = localizations.t('errors.ERROR_WRONG_PASSWORD');
+            break;
+          case "user-not_found":
+            _errorMessage = localizations.t('errors.ERROR_USER_NOT_FOUND');
+            break;
+          case "user-disabled":
+            _errorMessage = localizations.t('errors.ERROR_USER_DISABLED');
+            break;
+          case "too-many-requests":
+            _errorMessage = localizations.t('errors.ERROR_TOO_MANY_REQUESTS');
+            break;
+          case "operation-not-allowed":
+            _errorMessage = localizations.t('errors.ERROR_OPERATION_NOT_ALLOWED');
+            break;
+          default:
+            _errorMessage = localizations.t('errors.ERROR_DEFAULT');
+        }
+      return _errorMessage;
+    }
+
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: SafeArea(
@@ -121,20 +125,23 @@ class _LoginViewState extends State<LoginView> {
                           //   return CircularProgressIndicator();
                           // } else {
                           return Column(children: [
-                            Text(
-                              setError(login.getError()),
-                              style: TextStyle(
-                                  color: Colors.red,
-                                  fontFamily: 'Dinpro',
-                                  fontSize: 18),
-                            ),
+                            if (login.isError())
+                              Text(
+                                setError(login.getError()),
+                                style: TextStyle(
+                                    color: Colors.red,
+                                    fontFamily: 'Dinpro',
+                                    fontSize: 18),
+                              ),
                             SizedBox(
                               height: 55,
                             ),
                             OutlineButton(
-                                shape: new RoundedRectangleBorder(
+                                shape: RoundedRectangleBorder(
                                     borderRadius:
-                                        new BorderRadius.circular(10.0)),
+                                        BorderRadius.circular(10.0)),
+                                    borderSide:
+                                        BorderSide (color: Colors.grey, width: 0.5),
                                 child: Text(
                                   localizations.t('login.login'),
                                   style: TextStyle(
@@ -154,7 +161,8 @@ class _LoginViewState extends State<LoginView> {
                   ),
                 ),
                 Text(
-                  localizations.t('login.forgot'),
+                  "",
+                  //localizations.t('login.forgot'),
                   style: TextStyle(fontFamily: 'Dinpro', fontSize: 18),
                 ),
               ],

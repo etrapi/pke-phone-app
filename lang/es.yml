@@ -28,8 +28,21 @@ key:
   ldoor: PUERTA IZQ.
   rdoor: PUERTA DER.
   inlet: INLET
+  stopCharge: PARAR CARGA
   blesearch: BUSCANDO HISPANO-SUIZA ...
+  demomode1: MODO DE PRUEBA
+  demomode2: ACERQUESE AL COCHE PARA OCULTAR
+  demomode3: PULSE SOBRE LAS AREAS PARA ABRIR/CERRAR
 
 climate:
   adjust: DESLIZA PARA AJUSTAR
   defrost: DESCONGELAR
+
+errors:
+  ERROR_INVALID_EMAIL: El formato del e-mail no es correcto.
+  ERROR_WRONG_PASSWORD: Contraseña incorrecta.
+  ERROR_USER_NOT_FOUND: Usuario no encontrado.
+  ERROR_USER_DISABLED: EL usuario con este e-mail ha sido deshabilitado.
+  ERROR_TOO_MANY_REQUESTS: Demasiados intentos. Prueba de nuevo más tarde.
+  ERROR_OPERATION_NOT_ALLOWED: Registro con Email and Password desactivado.
+  ERROR_DEFAULT: Error inesperado.

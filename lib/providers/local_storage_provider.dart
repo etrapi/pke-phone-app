@@ -1,4 +1,4 @@
-import 'dart:convert';
+/*import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:hispanosuizaapp/core/models/user.dart';
@@ -7,7 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalStorageProvider extends ChangeNotifier {
 
   static const String UserKey = 'user';
-  final defaultUser = User (name:"Saul", surname:"Trapiello", keyId: 1);
+  bool demoMode = true;
+  final defaultUser = User (name:"Saul", surname:"Trapiello", keyId: 1, demoMode: true);
   var instance;
 
   setup() async {
@@ -34,6 +35,8 @@ class LocalStorageProvider extends ChangeNotifier {
   }
 
 
+
+
   // Get and Set from Disk
   dynamic _getFromDisk(String key) {
     var prefs = instance;
@@ -48,4 +51,4 @@ class LocalStorageProvider extends ChangeNotifier {
     print('(TRACE) LocalStorageService:_saveStringToDisk. key: $key value: $content');
     notifyListeners();
   }
-}
+}*/

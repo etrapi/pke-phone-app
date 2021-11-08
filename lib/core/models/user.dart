@@ -1,14 +1,16 @@
-class User {
+/*class User {
   final String name;
   final String surname;
   int keyId;
+  bool demoMode;
 
-  User({this.name, this.surname, this.keyId});
+  User({this.name, this.surname, this.keyId, this.demoMode});
 
   User.fromJson(Map<String, dynamic> json)
       : name = json['name'],
         surname = json['surname'],
-        keyId = json['keyId'];
+        keyId = json['keyId'],
+        demoMode = json['demoMode'];
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -17,4 +19,4 @@ class User {
     data['keyId' ]= this.keyId;
     return data;
   }
-}
+}*/
