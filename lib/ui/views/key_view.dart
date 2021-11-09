@@ -397,7 +397,8 @@ class _KeyViewState extends State<KeyView> {
   Widget build(BuildContext context) {
     AppLocalizations localizations = AppLocalizations.of(context);
     VehicleProvider _vehicleProvider = Provider.of<VehicleProvider>(context);
-
+    _getUnits();
+    _getDemoMode();
     //Vehicle vehicle_provider = _vehicleProvider.vehicle;
 
     //print("Demo Mode: " + _demo.toString());
