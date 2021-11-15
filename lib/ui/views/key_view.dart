@@ -16,6 +16,7 @@ import 'package:typicons_flutter/typicons_flutter.dart';
 import 'package:hispanosuizaapp/core/models/vehicle_model.dart';
 import 'package:hispanosuizaapp/core/models/user.dart';
 import 'package:hispanosuizaapp/app_localizations.dart';
+import 'dart:io' show Platform;
 
 //TODO: Separar servicio Ble de UI y pasar el provider Vehículo al UI
 class KeyView extends StatefulWidget {
@@ -281,12 +282,12 @@ class _KeyViewState extends State<KeyView> {
         retry++;
       } catch (e) {
         print("PKE Write Exception: " + e.toString());
-        //await _resetConnection();
+        if (Platform.isAndroid) await _resetConnection();
         retry++;
         //throw e;
       }
     } while (retry < 5);
-    if (retry == 5) await _resetConnection();
+    if (Platform.isIOS && retry == 5) await _resetConnection();
 
   }
 
@@ -306,12 +307,12 @@ class _KeyViewState extends State<KeyView> {
         retry++;
       } catch (e) {
         print("CMD Write Exception " + e.toString());
-        //await _resetConnection();
+        if (Platform.isAndroid) await _resetConnection();
         retry++;
         //throw e;
       }
     } while (retry < 10);
-    if (retry == 10) await _resetConnection();
+    if (Platform.isIOS && retry == 10) await _resetConnection();
   }
 
   _readFbkData() async {
@@ -353,7 +354,7 @@ class _KeyViewState extends State<KeyView> {
       }
       print(retry);
     } while (retry < 5);
-    if (retry == 5) await _resetConnection();
+    //if (Platform.isIOS && retry == 5) await _resetConnection();
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
