@@ -369,7 +369,7 @@ class _KeyViewState extends State<KeyView> {
     _initStreams();
     _startDevicesDiscovery();
     _initScanBeacon();
-    Timer.periodic(Duration(milliseconds: 2000), (timer) async {
+    Timer.periodic(Duration(milliseconds: 1000), (timer) async {
       if (this.mounted) {
         print(DateTime.now());
         if (_connectedDevice != null) {
